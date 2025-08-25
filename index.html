@@ -5,7 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Flippy Bird</title>
   <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#70c5ce" />
+<meta name="theme-color" content="#0099ff"/>
+<link rel="icon" href="icons/icon-192.png" type="image/png">
   <style>
     body {
       display: flex;
@@ -116,5 +117,13 @@
 
     gameLoop();
   </script>
+<script>
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("service-worker.js")
+      .then(() => console.log("Service Worker registrado"))
+      .catch(err => console.log("Error en SW", err));
+  }
+</script>
+
 </body>
 </html>
