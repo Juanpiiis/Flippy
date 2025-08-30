@@ -3,10 +3,12 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Flippy Bird</title>
+  <title>Flippy Bird PWA</title>
+  
   <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#0099ff"/>
-<link rel="icon" href="icons/icon-192.png" type="image/png">
+  <meta name="theme-color" content="#0099ff"/>
+  <link rel="icon" href="icons/icon-192.png" type="image/png">
+  
   <style>
     body {
       display: flex;
@@ -18,42 +20,60 @@
       overflow: hidden;
     }
     canvas {
-      background: #70c5ce;
       border: 2px solid #000;
+      background: linear-gradient(#70c5ce, #fff);
     }
   </style>
 </head>
 <body>
   <canvas id="gameCanvas" width="400" height="600"></canvas>
-  
+
   <script>
+   
     if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('service-worker.js')
-          .then(reg => console.log('Service Worker registrado:', reg))
-          .catch(err => console.error('Error al registrar Service Worker:', err));
-      });
+      navigator.serviceWorker.register('service-worker.js')
+        .then(() => console.log("Service Worker registrado"))
+        .catch(err => console.error("Error en SW", err));
     }
 
     const canvas = document.getElementById("gameCanvas");
     const ctx = canvas.getContext("2d");
 
-    let bird = { x: 50, y: 150, width: 30, height: 30, gravity: 0.6, lift: -10, velocity: 0 };
+    const birdImg = new Image();
+    birdImg.src = "bird.png"; 
+
+    const pipeTopImg = new Image();
+    pipeTopImg.src = "pipe-top.png"; 
+
+    const pipeBottomImg = new Image();
+    pipeBottomImg.src = "pipe-bottom.png"; 
+
+    const bgImg = new Image();
+    bgImg.src = "background.png"; 
+
+    let bird = {
+      x: 50,
+      y: 150,
+      width: 34,
+      height: 24,
+      gravity: 0.6,
+      lift: -10,
+      velocity: 0
+    };
+
     let pipes = [];
     let frame = 0;
     let score = 0;
     let gameOver = false;
 
     function drawBird() {
-      ctx.fillStyle = "yellow";
-      ctx.fillRect(bird.x, bird.y, bird.width, bird.height);
+      ctx.drawImage(birdImg, bird.x, bird.y, bird.width, bird.height);
     }
 
     function drawPipes() {
-      ctx.fillStyle = "green";
       pipes.forEach(pipe => {
-        ctx.fillRect(pipe.x, 0, pipe.width, pipe.top);
-        ctx.fillRect(pipe.x, canvas.height - pipe.bottom, pipe.width, pipe.bottom);
+        ctx.drawImage(pipeTopImg, pipe.x, pipe.top - pipeTopImg.height, pipe.width, pipeTopImg.height);
+        ctx.drawImage(pipeBottomImg, pipe.x, canvas.height - pipe.bottom, pipe.width, pipeBottomImg.height);
       });
     }
 
@@ -67,13 +87,15 @@
 
     function updatePipes() {
       if (frame % 90 === 0) {
-        let gap = 120;
+        let gap = 130;
         let top = Math.random() * (canvas.height / 2);
         let bottom = canvas.height - top - gap;
-        pipes.push({ x: canvas.width, width: 40, top: top, bottom: bottom });
+        pipes.push({ x: canvas.width, width: 50, top: top, bottom: bottom });
       }
+
       pipes.forEach(pipe => {
         pipe.x -= 2;
+
         if (
           bird.x < pipe.x + pipe.width &&
           bird.x + bird.width > pipe.x &&
@@ -81,6 +103,7 @@
         ) {
           gameOver = true;
         }
+
         if (pipe.x + pipe.width < 0) {
           pipes.shift();
           score++;
@@ -101,9 +124,15 @@
         ctx.fillText("Game Over", 100, 300);
         return;
       }
+
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      drawBird();
+
+      if (bgImg.complete) {
+        ctx.drawImage(bgImg, 0, 0, canvas.width, canvas.height);
+      }
+
       drawPipes();
+      drawBird();
       drawScore();
       updateBird();
       updatePipes();
@@ -111,19 +140,11 @@
       requestAnimationFrame(gameLoop);
     }
 
-    document.addEventListener("keydown", () => {
-      bird.velocity = bird.lift;
-    });
+    document.addEventListener("keydown", () => bird.velocity = bird.lift);
+    document.addEventListener("click", () => bird.velocity = bird.lift);
 
     gameLoop();
   </script>
-<script>
-  if ("serviceWorker" in navigator) {
-    navigator.serviceWorker.register("service-worker.js")
-      .then(() => console.log("Service Worker registrado"))
-      .catch(err => console.log("Error en SW", err));
-  }
-</script>
-
 </body>
 </html>
+
